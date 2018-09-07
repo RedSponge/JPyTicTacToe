@@ -31,12 +31,19 @@ def handle_connection(client, id):
     else:
         send(client, "full")
         return
+    print assignedO, assignedX, engine.game_started
     if assignedX and assignedO and not engine.game_started:
+        print "Starting Game"
         engine.start_game()
     try:
         while True:
             try:
                 data = client.recv(1024)
+                if not engine.game_started:
+                    continue
+                if data == "end":
+
+                    break
             except:
                 break
             # print "Got {} from player {}".format(data, player)

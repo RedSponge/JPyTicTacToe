@@ -16,12 +16,25 @@ public class Client {
     private int[] board;
     private GameButton[] buttons;
     private Thread receiver;
+    private String ip;
+    private int port;
+    private boolean connected;
 
     public Client() {
         createGUI();
-        String ip = JOptionPane.showInputDialog(frame, "Ip:");
-        int port = Integer.parseInt(JOptionPane.showInputDialog(frame, "Port:"));
+//        ip = JOptionPane.showInputDialog(frame, "Ip:");
+//        port = Integer.parseInt(JOptionPane.showInputDialog(frame, "Port:"));
+        ip = Constants.IP;
+        port = Constants.PORT;
 
+
+
+        connect();
+
+        createBoard();
+    }
+
+    private void connect() {
         try {
             connection = new SocketHandler(ip, port) {
                 @Override
@@ -30,12 +43,18 @@ public class Client {
                     handleInput(data);
                 }
             };
+            connected = true;
         }
         catch (IOException e) {
             playerIndicator.setText("Couldn't Connect To Server!");
             return;
         }
-        createBoard();
+    }
+
+    private void disconnect() {
+        connected = false;
+        connection.close();
+        System.out.println("DISCONNECT");
     }
 
     private void handleInput(String input) {
@@ -63,7 +82,14 @@ public class Client {
                 winMessage = "Its A Draw!";
             }
             JOptionPane.showMessageDialog(frame, winMessage, "Breaking News!", JOptionPane.INFORMATION_MESSAGE);
-            connection.close();
+            int i = JOptionPane.showConfirmDialog(frame, "Play Again?", "Ooo, Fancy", JOptionPane.YES_NO_OPTION);
+            if(i == 0) {
+                createBoard();
+            } else {
+                disconnect();
+                System.out.println("EXITING");
+            }
+
         }
     }
 
@@ -129,6 +155,8 @@ public class Client {
     }
 
     private void sendPress(int id) {
+        System.out.println(connected);
+        if(!connected) return;
         connection.send(Constants.BUTTON_PRESS + id);
     }
 

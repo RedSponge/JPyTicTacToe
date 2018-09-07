@@ -69,6 +69,7 @@ public class SocketHandler {
     public void close() {
         try {
             listener.join();
+            send("end");
             out.close();
             in.close();
             socket.close();
